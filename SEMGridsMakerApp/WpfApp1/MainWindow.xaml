@@ -5,9 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SEMGridsMakerApp"
         mc:Ignorable="d"
-        Title="SEMGrids Maker" Height="350" Width="525">
+        Title="SEMGrids Maker" Height="440" Width="820">
     <Grid>
-        <TextBlock HorizontalAlignment="Left" Margin="241,156,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="SALUT"/><LineBreak/><Run/></TextBlock>
+        <DockPanel    x:Name="containerPrincipal">
+            <ContentControl x:Name="ContentControl" >
+                <local:ControlMenu/>
+            </ContentControl>
+        </DockPanel>
 
     </Grid>
 </Window>
