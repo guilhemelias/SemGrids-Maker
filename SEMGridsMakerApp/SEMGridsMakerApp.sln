@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEMGridsMakerModel", "ModèleSEMGridsMaker\SEMGridsMakerModel.csproj", "{9E076751-666F-40A0-B6CA-9F607369DF5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEMGridsMakerModel", "ModèleSEMGridsMaker\SEMGridsMakerModel.csproj", "{9E076751-666F-40A0-B6CA-9F607369DF5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEMGridsMakerApp", "SEMGridsMakerApp\SEMGridsMakerApp.csproj", "{0C0F0E5B-C94A-4706-96E1-4739CA9E2361}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEMGridsMakerApp", "SEMGridsMakerApp\SEMGridsMakerApp.csproj", "{0C0F0E5B-C94A-4706-96E1-4739CA9E2361}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
