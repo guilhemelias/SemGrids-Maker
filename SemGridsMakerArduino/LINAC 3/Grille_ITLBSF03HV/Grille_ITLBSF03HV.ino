@@ -17,7 +17,7 @@ int M2_pwm = 10;
 int M2_dir = 8;
  
 
-//motor 1 paramiters
+//motor 1 parameters
 int M1_max_speed = 1500;               // steps per second
 int M1_max_acc = 200;                                 // steps per second second
 int M1_min_speed = 500;

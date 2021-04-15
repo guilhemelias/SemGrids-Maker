@@ -32,13 +32,13 @@ int M1_max_acc = 200;
 int M1_min_speed = 400;                // steps per second second
 //motor 2 paramiters
 
-int M2_max_speed = 4000;                 // steps per second
-int M2_max_acc = 1000;                                 // steps per second second
+int M2_max_speed = 4000;               // steps per second
+int M2_max_acc = 1000;                 // steps per second second
 int M2_min_speed = 1000;
                                                                                             
 
-int M1_stepsPer_Rot = 3200;                  //steps per rotation
-int M2_stepsPer_Rot = 3200;                  //steps per rotation
+int M1_stepsPer_Rot = 3200;            //steps per rotation
+int M2_stepsPer_Rot = 3200;            //steps per rotation
 
 
 
@@ -73,7 +73,7 @@ float e_pas=3.8;//5 tour -> pas de 3.8mm
 
 //Repartition grille RegularStep
 int regularStep = 1;
-int nombre_de_tour=5;
+int nombre_de_tour=2;
 float distGlissiere = regularStep*25;
 
 
@@ -86,13 +86,35 @@ float distGlissiere = regularStep*25;
 ///SETUP&LOOP/////////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
-  // put your setup code here, to run once:
+  
+  // motor 1
+   pinMode(M1_com, OUTPUT);
+   pinMode(M1_EN, OUTPUT);
+   pinMode(M1_pwm, OUTPUT);
+   pinMode(M1_dir, OUTPUT);
+ 
+   //motor2
+   pinMode(M2_EN, OUTPUT);
+   pinMode(M2_pwm, OUTPUT);
+   pinMode(M2_dir, OUTPUT);
 
+   // enable motor
+   digitalWrite(M1_com, HIGH);
+   digitalWrite(M1_EN, LOW); 
+
+   //establish motor direction toggle pins
+   pinMode(12, OUTPUT); //CH A -- HIGH = forwards and LOW = backwards???
+   pinMode(13, OUTPUT); //CH B -- HIGH = forwards and LOW = backwards???
+  
+   //establish motor brake pins
+   pinMode(9, OUTPUT); //brake (disable) CH A
+   pinMode(8, OUTPUT); //brake (disable) CH B
 }
 
 void loop() {
   delay(4000);  //pause de 4s  
   //reposition();
+  moveRegularStep();
   while(-1){} //Arret de la boucle
 
 }
@@ -109,11 +131,12 @@ void loop() {
 void reposition(){
   int i =0;
   while(i<=pas4){
-  //GlisCCW(delaylegnth);
-  GlisCW(5);
+  GlisCCW(5);
+  //GlisCW(5);
   i++;
   }
 }
+
 void moveRegularStep(){
   int dir = 1;
        int i=0;
