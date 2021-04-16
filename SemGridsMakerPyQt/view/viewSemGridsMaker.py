@@ -2,9 +2,12 @@
 """
 Spyder Editor
 
-This is a temporary script file.
+@author: gelias
 """
 import sys
+import os
+import serial
+import time
 
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
@@ -15,7 +18,7 @@ from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow
 class MainWindows(QMainWindow):
     def __init__(self):
         super(MainWindows,self).__init__()     
-        loadUi("main_windows.ui",self)      
+        loadUi("viewUi/main_windows.ui",self)      
         self.setWindowTitle("Ma fenetre")
         self.regularStepButton.clicked.connect(self.regularStepButtonClicked)
         self.linacButton.clicked.connect(self.linac3ButtonClicked)
@@ -40,24 +43,27 @@ class MainWindows(QMainWindow):
         
         
         
-        
 
 class RegularStepDialog(QDialog):
     def __init__(self):
         super(RegularStepDialog,self).__init__()
-        loadUi("regular_step.ui",self)
+        loadUi("viewUi/regular_step.ui",self)
         self.menuButton.clicked.connect(self.menuButtonClicked)
+        self.runRegularStepButton.clicked.connect(self.runRegularStepButtonButtonClicked)
         
     def menuButtonClicked(self):
         mw=MainWindows()
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
+    def runRegularStepButtonButtonClicked(self):
+        ar = Arduino()
+        ar.initUART()
 
 
 class Linac3Dialog(QDialog):
     def __init__(self):
         super(Linac3Dialog,self).__init__()
-        loadUi("linac_3.ui",self)
+        loadUi("viewUi/linac_3.ui",self)
         self.menuButton.clicked.connect(self.menuButtonClicked)
         
     def menuButtonClicked(self):
@@ -69,7 +75,7 @@ class Linac3Dialog(QDialog):
 class CustomDialog(QDialog):
     def __init__(self):
         super(CustomDialog,self).__init__()
-        loadUi("custom.ui",self)
+        loadUi("viewUi/custom.ui",self)
         self.menuButton.clicked.connect(self.menuButtonClicked)
         
     def menuButtonClicked(self):
@@ -79,25 +85,46 @@ class CustomDialog(QDialog):
 
 
 
-app = QApplication.instance() 
-if not app:
+
+
+class Arduino:
+    def __init__(self):
+        self.initUART('COM3')  # En windows de COM4 a COM 30
+   
+    def initUART(self,port):
+    		baudrate = 9600	
+    		try: 	
+    			self.ser = serial.Serial(
+    				port,
+    				baudrate,
+    				timeout=1,
+    				# parity=serial.PARITY_NONE,
+    				# stopbits=serial.STOPBITS_ONE,
+    				# bytesize=serial.EIGHTBITS
+    			)
+    		except serial.SerialException as e:
+    			print("port inconnu" % port)
+    			self.ser.close()
+    			sys.exit(-1)
+
+
+
+
+
+
+# app = QApplication.instance() 
+# if not app:
+#     app = QApplication(sys.argv)
+
+
+
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-
-widget=QtWidgets.QStackedWidget()
-mw=MainWindows()
-
-widget.addWidget(mw)
-widget.setFixedHeight(400)
-widget.setFixedWidth(800)
-widget.setWindowTitle("SEMGrids Maker")
-widget.show()
-
-
-    
-# widget=QtWidgets.QStackedWidget()
-# mw=MainWindows()
-# widget.addWigdet(mw)
-# widget.show()
-
-app.exec_()
-
+    mw=MainWindows()
+    widget=QtWidgets.QStackedWidget()
+    widget.addWidget(mw)
+    widget.setFixedHeight(400)
+    widget.setFixedWidth(800)
+    widget.setWindowTitle("SEMGrids Maker")
+    widget.show()
+    sys.exit(app.exec_())
