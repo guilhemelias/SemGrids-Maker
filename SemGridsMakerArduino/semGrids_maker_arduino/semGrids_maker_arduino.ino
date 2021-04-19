@@ -10,8 +10,6 @@ AccelStepper stepper(1,10,8);
 
 
 
-
-
 ///PARAM/////////////////////////////////////////////////////////////////////////////////////
 
 //motor 1
@@ -73,7 +71,7 @@ float e_pas=3.8;//5 tour -> pas de 3.8mm
 
 //Repartition grille RegularStep
 int regularStep = 1;
-int nombre_de_tour=2;
+int nombre_de_tour=1;
 float distGlissiere = regularStep*25;
 
 
@@ -187,8 +185,6 @@ void moveRegularStep(){
 
 
 
-
-
 ///Fonctions mouvement Bobineuse/////////////////////////////////////////////////////////////////////////////////////
 
 void move(int Nsteps1, int Nsteps2, int ratio, int dir1, int dir2) {
@@ -207,7 +203,10 @@ void move(int Nsteps1, int Nsteps2, int ratio, int dir1, int dir2) {
        while (Nstepsdone1 < wileSteps1) {
               //motor 1
               long int dely1 = delaytime(M1_max_speed, M1_min_speed, Nstepsdone1);
+              
               takeStep(M1_pwm, dely1, M1_dir, dir1);
+              
+              
               Nstepsdone1++;
               //ratio conditions
               if (Nstepsdone1%ratio == 0 && step2 == true) {
@@ -337,3 +336,5 @@ void GlisCW(int delaylegnth){
     delay(delaylegnth);
 
 }
+
+

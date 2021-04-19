@@ -56,7 +56,7 @@ class RegularStepDialog(QDialog):
         print(self.manager.maker.get_portCom())
         super(RegularStepDialog,self).__init__()
         loadUi("viewUi/regular_step.ui",self)
-        self.label.setText(self.manager.maker.get_portCom())
+       # self.label.setText(self.manager.maker.get_portCom())
         self.menuButton.clicked.connect(self.menuButtonClicked)
         self.runRegularStepButton.clicked.connect(self.runRegularStepButtonButtonClicked)
         
@@ -65,8 +65,8 @@ class RegularStepDialog(QDialog):
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
     def runRegularStepButtonButtonClicked(self):
-        ar = Arduino(self.manager.maker.get_portCom())
-        ar.initUART()
+        ar = Arduino()
+        ar.initUART(self.manager.maker.get_portCom())
 
 
 

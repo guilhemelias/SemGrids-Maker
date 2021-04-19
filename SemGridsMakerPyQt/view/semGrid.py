@@ -6,9 +6,9 @@ Created on Mon Apr 19 09:13:54 2021
 """
 
 class SemGrid:
-    def __init__(self,name,seq,lien,desc):
+    def __init__(self,name,lien,desc):
         self.name = name
-        self.sequemce = seq
+        self.sequemce = {}
         self.lienImage = lien
         self.descritpion = desc
 

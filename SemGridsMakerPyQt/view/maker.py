@@ -19,8 +19,8 @@ class Maker:
     def set_portCom(self, com):
         self.portCom = com
         
-    def addSemGrids(self,name,sequence,lien,desc):
-        self.mesSemGrids.append(SemGrid(name,sequence,lien,desc))
+    def addSemGrids(self,name,lien,desc):
+        self.mesSemGrids.append(SemGrid(name,lien,desc))
     
     def deleteSemGrid(self,index):
         self.mesSemGrids.pop(index)

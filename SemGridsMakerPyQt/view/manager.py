@@ -11,16 +11,16 @@ class Manager:
     def __init__(self):
         self.maker = Maker()
     
-    def addSemGrids(self,name,sequence,lien,desc):
+    def addSemGrid(self,name,lien,desc):
         for grid in self.mesSemGrids:
             if (grid.name == name):
                 print('SemGrid deja existente')
                 return
-        self.maker.addSemGrids(name,sequence,lien,desc)
+        self.maker.addSemGrids(name,lien,desc)
     
-    def deleteSemGrid(self,SemGrid):
+    def deleteSemGrid(self,semGrid):
         for grid in self.mesSemGrids:
-            if(grid == SemGrid):
+            if(grid == semGrid):
                 index = self.mesSemGrids.index(grid)
         if index is None:
             print('SemGrid non trouve')
