@@ -10,6 +10,7 @@ from semGrid import SemGrid
 class Maker:
     def __init__(self):
         self.mesSemGrids = []
+        self.portCom=None
 
     # getter method
     def get_portCom(self):

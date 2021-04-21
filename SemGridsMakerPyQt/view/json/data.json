@@ -1,0 +1,43 @@
+{
+    "maker": {
+        "mesSemGrids": [
+            {
+                "descritpion": "Regular Step description",
+                "name": "Regular Step",
+                "sequemce": [
+                    [
+                        1,
+                        50
+                    ]
+                ]
+            },
+            {
+                "descritpion": "Linac3",
+                "name": "test2",
+                "sequemce": [
+                    [
+                        3.8,
+                        5
+                    ],
+                    [
+                        2.4,
+                        7
+                    ],
+                    [
+                        1.6,
+                        6
+                    ],
+                    [
+                        2.4,
+                        7
+                    ],
+                    [
+                        3.8,
+                        5
+                    ]
+                ]
+            }
+        ],
+        "portCom": "COM3"
+    }
+}
