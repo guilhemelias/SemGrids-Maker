@@ -146,6 +146,12 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="overwriteMode">
+         <bool>false</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Hey</string>
+        </property>
        </widget>
       </item>
       <item>

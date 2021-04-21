@@ -9,7 +9,7 @@ from maker import Maker
 from json import JSONEncoder
 import json
 
-class Manager:
+class Manager(JSONEncoder):
     def __init__(self):
         self.maker = Maker()
     

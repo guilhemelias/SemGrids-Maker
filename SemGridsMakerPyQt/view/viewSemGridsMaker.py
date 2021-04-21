@@ -8,6 +8,8 @@ import sys
 import os
 import serial
 import time
+import json
+import pickle
 from json import dump
 from io import StringIO
 from PyQt5 import Qt
@@ -18,6 +20,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import uic
 from PyQt5 import QtGui
 from semGrid import SemGrid
+
 
 
 from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow, QLabel,QListWidgetItem, QListWidget, QAction
@@ -34,6 +37,7 @@ class MainWindows(QMainWindow):
         loadUi("viewUi/main_windows.ui",self)      
         self.setWindowTitle("Ma fenetre")
         self.manager = mgr
+        self.editCom.setPlaceholderText(self.manager.maker.get_portCom())
         # self.regularStepButton.clicked.connect(self.regularStepButtonClicked)
         # self.linacButton.clicked.connect(self.linac3ButtonClicked)
         # self.customButton.clicked.connect(self.customButtonClicked)
@@ -95,7 +99,7 @@ class ItemPropertyCustom(QWidget):
 class RegularStepDialog(QDialog):
     def __init__(self,mgr):
         self.manager=mgr
-        print(self.manager.maker.get_portCom())
+        #print(self.manager.maker.get_portCom())
         super(RegularStepDialog,self).__init__()
         loadUi("viewUi/regular_step.ui",self)
        # self.label.setText(self.manager.maker.get_portCom())
@@ -179,8 +183,9 @@ class CustomDialog(QDialog):
 
 class MainWidget(QtWidgets.QStackedWidget):
     def __init__(self):
-        super(MainWidget,self).__init__()   
-        self.manager = Manager()
+        super(MainWidget,self).__init__()           
+        #self.manager = Manager()
+        self.toJson()
         mw=MainWindows(self.manager)
         self.addWidget(mw)
         self.setFixedHeight(400)
@@ -193,11 +198,36 @@ class MainWidget(QtWidgets.QStackedWidget):
         self.addAction(quit)
 
     def closeEvent(self, event):
-        print('ouigho8')
-        self.manager.toJSON()
-        print(self.manager.toJSON())
+        #print(self.manager)
+        # jsoned=pickle.dumps(self.manager,pickle.HIGHEST_PROTOCOL)
+        # print(jsoned)
+        # dejsoned=pickle.loads(jsoned)
+        # dejsoned.maker.get_portCom()
+        with open('bin/data.bin','wb') as fh:
+            pickle.dump(self.manager,fh,pickle.HIGHEST_PROTOCOL)
         event.accept()
-
+        
+    def toJson(self):
+        with open('bin/data.bin', 'rb') as fh:
+            data = pickle.load(fh)
+        print(data)
+        self.manager = data
+        # with open('json/data.json') as fh:
+        #     data = json.load(fh)            
+        # print(data['maker']['mesSemGrids']) 
+        # for grid in data['maker']['mesSemGrids']:
+        #     seq = []
+        #     print(grid) #une grid
+        #     desc=grid['descritpion']
+        #     #print(grid['descritpion'])
+        #     name=grid['name']
+        #     #print(grid['name'])
+        #     for att in grid['sequence']:
+        #         seq.append(att)
+        #         print(seq)
+        #     self.manager.addSemGrid(name,seq,desc)
+        # print(data['maker']['portCom'])
+        # self.manager.maker.set_portCom(data['maker']['portCom'])        
 
 # app = QApplication.instance() 
 # if not app:

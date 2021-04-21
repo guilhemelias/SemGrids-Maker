@@ -6,8 +6,9 @@ Created on Mon Apr 19 09:00:27 2021
 """
 
 from semGrid import SemGrid
+from json import JSONEncoder
 
-class Maker:
+class Maker(JSONEncoder):
     def __init__(self):
         self.mesSemGrids = []
         self.portCom=None
@@ -28,5 +29,5 @@ class Maker:
         
     def showListGrids(self):
         for grid in self.mesSemGrids:
-            print( grid.name, grid.sequence,grid.lienImage, grid.descritpion, sep =' ' )
-        
+            print( grid.name, grid.sequence, grid.descritpion, sep =' ' )
+    
