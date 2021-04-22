@@ -7,6 +7,7 @@ Spyder Editor
 import sys
 import serial
 import pickle
+import re 
 
 from arduino import Arduino
 from manager import Manager
@@ -19,39 +20,44 @@ from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow, QLabel,
 
 
 
-
 class MainWindows(QMainWindow):
     def __init__(self,mgr):
         super(MainWindows,self).__init__()     
         loadUi("viewUi/main_windows.ui",self)      
         self.setWindowTitle("Ma fenetre")
         self.manager = mgr
-        self.editCom.setPlaceholderText(self.manager.maker.get_portCom())
-        # self.regularStepButton.clicked.connect(self.regularStepButtonClicked)
-        # self.linacButton.clicked.connect(self.linac3ButtonClicked)
+        self.editCom.setText(self.manager.maker.get_portCom())
         self.customButton.clicked.connect(self.customButtonClicked)
         self.listProgramme.itemSelectionChanged.connect(self.progammeSelec)
         for grid in self.manager.maker.mesSemGrids:
             self.listProgramme.addItem(grid.name)
-
+        
 
     def customButtonClicked(self):
-        self.manager.maker.set_portCom(self.editCom.toPlainText())
+        if(self.editCom.toPlainText()==""):
+            self.editCom.setPlaceholderText(self.manager.maker.get_portCom())
+        else:
+            self.manager.maker.set_portCom(self.editCom.toPlainText())
         custom=CustomDialog(self.manager)
         widget.addWidget(custom)
         widget.setCurrentIndex(widget.currentIndex()+1)
     
         
     def progammeSelec(self):
-        self.manager.maker.set_portCom(self.editCom.toPlainText())
+        if(self.editCom.toPlainText()==""):
+            self.editCom.setPlaceholderText(self.manager.maker.get_portCom())
+        else:
+            self.manager.maker.set_portCom(self.editCom.toPlainText())
         prgrmName = self.listProgramme.currentItem().text()
-        # print(prgrmName)
         grid=self.manager.searchSemGrids(prgrmName)
-        print(grid)
         custom=CommonProgrammDialog(self.manager,grid)
         widget.addWidget(custom)
         widget.setCurrentIndex(widget.currentIndex()+1)
-        
+
+
+
+
+
 class ItemPropertyCustom(QWidget):
     def __init__(self,parent=None):
         super(ItemPropertyCustom,self).__init__(parent)
@@ -80,17 +86,15 @@ class CommonProgrammDialog(QDialog):
         loadUi("viewUi/common_programm_dialog.ui",self)
         self.labelDisplayProgrammName.setText(self.manager.getMyCurrentGrid().name)
         propertyGrid=self.manager.getMyCurrentGrid().sequence
-        # Create QListWidgetItem
         
         for seq in propertyGrid:
             myQListWidgetItem  = QListWidgetItem(self.listPropertiesLoaded)
             self.listPropertiesLoaded.addItem(myQListWidgetItem)
             myItemPropertyDisplayCustom = ItemPropertyDisplayCustom(seq)             
             myQListWidgetItem.setSizeHint(myItemPropertyDisplayCustom.minimumSizeHint())
-            # Add QListWidgetItem into QListWidget
             self.listPropertiesLoaded.setItemWidget(myQListWidgetItem, myItemPropertyDisplayCustom)
             
-        self.editGap.setPlaceholderText(str(self.manager.maker.get_gap()))
+        self.editGap.setText(str(self.manager.maker.get_gap()))
         self.menuButton.clicked.connect(self.menuButtonClicked)
         self.deleteGridButton.clicked.connect(self.deleteGridButtonClicked)
         self.runCommonButton.clicked.connect(self.runCommonButtonClicked)
@@ -110,44 +114,18 @@ class CommonProgrammDialog(QDialog):
         widget.setCurrentIndex(widget.currentIndex()+1)
         
     def runCommonButtonClicked(self):
-        self.manager.maker.set_gap(self.editGap.toPlainText())
+        regex = re.search("^[1-9]\d*$", self.editGap.toPlainText())       
+        if (regex):
+          self.manager.maker.set_gap(self.editGap.toPlainText())
+        else:
+            self.editGap.clear()
+            self.LabelErrorGap.setText('YOU MUST ENTER A NUMERIC VALUE')
+            return
+
         mw=MainWindows(self.manager)
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
 
-# class RegularStepDialog(QDialog):
-#     def __init__(self,mgr):
-#         self.manager=mgr
-#         #print(self.manager.maker.get_portCom())
-#         super(RegularStepDialog,self).__init__()
-#         loadUi("viewUi/regular_step.ui",self)
-#        # self.label.setText(self.manager.maker.get_portCom())
-#         self.menuButton.clicked.connect(self.menuButtonClicked)
-#         self.runRegularStepButton.clicked.connect(self.runRegularStepButtonButtonClicked)
-        
-#     def menuButtonClicked(self):
-#         mw=MainWindows(self.manager)
-#         widget.addWidget(mw)
-#         widget.setCurrentIndex(widget.currentIndex()+1)
-        
-#     def runRegularStepButtonButtonClicked(self):
-#         ar = Arduino()
-#         ar.initUART(self.manager.maker.get_portCom())
-
-
-
-
-# class Linac3Dialog(QDialog):
-#     def __init__(self,mgr):
-#         self.manager=mgr
-#         super(Linac3Dialog,self).__init__()
-#         loadUi("viewUi/linac_3.ui",self)
-#         self.menuButton.clicked.connect(self.menuButtonClicked)
-        
-#     def menuButtonClicked(self):
-#         mw=MainWindows(self.manager)
-#         widget.addWidget(mw)
-#         widget.setCurrentIndex(widget.currentIndex()+1)
  
         
 class CustomDialog(QDialog):
@@ -161,14 +139,13 @@ class CustomDialog(QDialog):
         self.listProperties.addItem(myQListWidgetItem)
         myQListWidgetItem.setSizeHint(myItemPropertyCustom.minimumSizeHint())
         
-        self.editGap.setPlaceholderText(self.manager.maker.get_gap())
+        self.editGap.setText(self.manager.maker.get_gap())
         
         self.listProperties.setItemWidget(myQListWidgetItem, myItemPropertyCustom)
         self.menuButton.clicked.connect(self.menuButtonClicked)
         self.addButton.clicked.connect(self.addButtonClicked)
         self.deleteButton.clicked.connect(self.deleteButtonClicked)
         self.runCustomButton.clicked.connect(self.runCustomButtonClicked)
-
         
     def menuButtonClicked(self):
         mw=MainWindows(self.manager)
@@ -191,17 +168,30 @@ class CustomDialog(QDialog):
               widget.deleteLater()     
 
     def runCustomButtonClicked(self):
-        self.manager.maker.set_gap(self.editGap.toPlainText())
+        regex = re.search("^[1-9]\d*$", self.editGap.toPlainText())       
+        if (regex):
+          self.manager.maker.set_gap(self.editGap.toPlainText())
+        else:
+            self.editGap.clear()
+            self.LabelErrorGap.setText('YOU MUST ENTER A NUMERIC VALUE')
+            return
         nbRow = self.listProperties.count()
         sequence = []
-        if nbRow > 0:
-              i=0
+        if nbRow <= 0:
+            print('REMPLIR CASES')
+        i=0
+        bool=True
         while i < nbRow:
-            dirname = self.listProperties.itemWidget(self.listProperties.item(i))            
+            dirname = self.listProperties.itemWidget(self.listProperties.item(i))  
+            regexStep = re.search("^[1-9]\d*$", dirname.lapsLabel.toPlainText())
+            regexLabel = re.search("^[1-9]\d*$", dirname.stepslabel.toPlainText())
+            if( not regexStep or  not regexLabel):
+                self.labelError.setText('YOU MUST ENTER FLOAT STEPS AND NUMERIC LAPS')
+                return
+            self.labelError.clear()
             sequence.append([float(dirname.stepslabel.toPlainText()),int(dirname.lapsLabel.toPlainText())])
             i=i+1
-        print(sequence)    
-        # self.manager.addSemGrid('test',sequence,'Regular Step description')
+        
         custom=GridCreateDialog(self.manager,sequence)
         custom.exec_()
         mw=MainWindows(self.manager)
@@ -253,9 +243,7 @@ class MainWidget(QtWidgets.QStackedWidget):
     def toJson(self):
         with open('bin/data.bin', 'rb') as fh:
             data = pickle.load(fh)
-        print(data)
         self.manager = data
-        print(self.manager.showSemGrids())
         # with open('json/data.json') as json_file:
         #     data = json.load(json_file)
         # print(data)
