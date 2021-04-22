@@ -7,11 +7,13 @@ Created on Mon Apr 19 10:23:54 2021
 
 from maker import Maker
 from json import JSONEncoder
+from semGrid import SemGrid
 import json
 
-class Manager(JSONEncoder):
+class Manager():
     def __init__(self):
         self.maker = Maker()
+        self.myCurrentGrid=None
     
     def addSemGrid(self,name,seq,desc):
         for grid in self.maker.mesSemGrids:
@@ -29,8 +31,16 @@ class Manager(JSONEncoder):
             return
         self.maker.deleteSemGrid(index)
         
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-        
+    def showSemGrids(self):
+        self.maker.showListGrids()
     
+    def searchSemGrids(self,name):
+        for grid in self.maker.mesSemGrids:
+            if (grid.name == name):
+                return grid
+        return False
+    def setCurrentGrid(self,grid):
+        self.myCurrentGrid=grid
+        
+    def getMyCurrentGrid(self):
+        return self.myCurrentGrid

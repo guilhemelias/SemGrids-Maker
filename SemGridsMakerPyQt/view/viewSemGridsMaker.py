@@ -5,26 +5,20 @@ Spyder Editor
 @author: gelias
 """
 import sys
-import os
 import serial
-import time
-import json
 import pickle
-from json import dump
-from io import StringIO
-from PyQt5 import Qt
+import json
+
 from arduino import Arduino
 from manager import Manager
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
-from PyQt5 import uic
-from PyQt5 import QtGui
 from semGrid import SemGrid
 
 
 
 from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow, QLabel,QListWidgetItem, QListWidget, QAction
-testlist = ["RegularStep", "Linac3", "Custom"]
+
 
 
 
@@ -40,11 +34,11 @@ class MainWindows(QMainWindow):
         self.editCom.setPlaceholderText(self.manager.maker.get_portCom())
         # self.regularStepButton.clicked.connect(self.regularStepButtonClicked)
         # self.linacButton.clicked.connect(self.linac3ButtonClicked)
-        # self.customButton.clicked.connect(self.customButtonClicked)
+        self.customButton.clicked.connect(self.customButtonClicked)
         self.listProgramme.itemSelectionChanged.connect(self.progammeSelec)
-        for test in testlist:
-            obj = QListWidgetItem(self.listProgramme)
-            obj.setText(test)
+        for grid in self.manager.maker.mesSemGrids:
+            self.listProgramme.addItem(grid.name)
+
             
         
     # def regularStepButtonClicked(self):
@@ -59,31 +53,38 @@ class MainWindows(QMainWindow):
     #     widget.addWidget(linac)
     #     widget.setCurrentIndex(widget.currentIndex()+1)
     
-    # def customButtonClicked(self):
-    #     self.manager.maker.set_portCom(self.editCom.toPlainText())
-    #     custom=CustomDialog(self.manager)
-    #     widget.addWidget(custom)
-    #     widget.setCurrentIndex(widget.currentIndex()+1)
+    def customButtonClicked(self):
+        self.manager.maker.set_portCom(self.editCom.toPlainText())
+        custom=CustomDialog(self.manager)
+        widget.addWidget(custom)
+        widget.setCurrentIndex(widget.currentIndex()+1)
     
         
     def progammeSelec(self):
-        if(self.listProgramme.currentItem().text()=='RegularStep'):
-            self.manager.maker.set_portCom(self.editCom.toPlainText())
-            rsd=RegularStepDialog(self.manager)
-            widget.addWidget(rsd)
-            widget.setCurrentIndex(widget.currentIndex()+1)
+        # if(self.listProgramme.currentItem().text()=='Regular Step'):
+        #     self.manager.maker.set_portCom(self.editCom.toPlainText())
+        #     rsd=RegularStepDialog(self.manager)
+        #     widget.addWidget(rsd)
+        #     widget.setCurrentIndex(widget.currentIndex()+1)
             
-        elif(self.listProgramme.currentItem().text()=='Linac3'):
-            self.manager.maker.set_portCom(self.editCom.toPlainText())
-            linac=Linac3Dialog(self.manager)
-            widget.addWidget(linac)
-            widget.setCurrentIndex(widget.currentIndex()+1)
-        else:
-            self.manager.maker.set_portCom(self.editCom.toPlainText())
-            custom=CustomDialog(self.manager)
-            widget.addWidget(custom)
-            widget.setCurrentIndex(widget.currentIndex()+1)
-        
+        # elif(self.listProgramme.currentItem().text()=='Linac3'):
+        #     self.manager.maker.set_portCom(self.editCom.toPlainText())
+        #     linac=Linac3Dialog(self.manager)
+        #     widget.addWidget(linac)
+        #     widget.setCurrentIndex(widget.currentIndex()+1)
+        # else:
+        #     self.manager.maker.set_portCom(self.editCom.toPlainText())
+        #     custom=CustomDialog(self.manager)
+        #     widget.addWidget(custom)
+        #     widget.setCurrentIndex(widget.currentIndex()+1)
+        self.manager.maker.set_portCom(self.editCom.toPlainText())
+        prgrmName = self.listProgramme.currentItem().text()
+        # print(prgrmName)
+        grid=self.manager.searchSemGrids(prgrmName)
+        print(grid)
+        custom=CommonProgrammDialog(self.manager,grid)
+        widget.addWidget(custom)
+        widget.setCurrentIndex(widget.currentIndex()+1)
         
 class ItemPropertyCustom(QWidget):
     def __init__(self,parent=None):
@@ -93,7 +94,54 @@ class ItemPropertyCustom(QWidget):
         return self.label.text()
         
        
+class ItemPropertyDisplayCustom(QWidget):
+    def __init__(self,seq,parent=None):
+        super(ItemPropertyDisplayCustom,self).__init__(parent)
+        self.seq=seq
+        loadUi("viewUi/property_list_display_item.ui",self)
+        self.labelDispalySteps.setText(str(seq[0]))
+        self.labelDispalyLaps.setText(str(seq[1]))
+
+
+
+
+
+class CommonProgrammDialog(QDialog):
+    def __init__(self,mgr,grid):
+        self.manager=mgr
+        self.manager.setCurrentGrid(grid)
+        super(CommonProgrammDialog,self).__init__()
+        loadUi("viewUi/common_programm_dialog.ui",self)
+        self.labelDisplayProgrammName.setText(self.manager.getMyCurrentGrid().name)
+        propertyGrid=self.manager.getMyCurrentGrid().sequence
+        # Create QListWidgetItem
         
+        for seq in propertyGrid:
+            myQListWidgetItem  = QListWidgetItem(self.listPropertiesLoaded)
+            self.listPropertiesLoaded.addItem(myQListWidgetItem)
+            myItemPropertyDisplayCustom = ItemPropertyDisplayCustom(seq)             
+            myQListWidgetItem.setSizeHint(myItemPropertyDisplayCustom.minimumSizeHint())
+            # Add QListWidgetItem into QListWidget
+            self.listPropertiesLoaded.setItemWidget(myQListWidgetItem, myItemPropertyDisplayCustom)
+        
+        
+        
+        self.menuButton.clicked.connect(self.menuButtonClicked)
+        self.runCommonButton.clicked.connect(self.runCommonButtonClicked)
+    
+    def setList(self):
+        pass
+        
+    def menuButtonClicked(self):
+        mw=MainWindows(self.manager)
+        widget.addWidget(mw)
+        widget.setCurrentIndex(widget.currentIndex()+1)
+        
+    def runCommonButtonClicked(self):
+        pass
+
+
+
         
 
 class RegularStepDialog(QDialog):
@@ -166,25 +214,23 @@ class CustomDialog(QDialog):
         self.listProperties.setItemWidget(myQListWidgetItem, myItemPropertyCustom)
     
     def runCustomButtonClicked(self):
-        nbFolder = self.listProperties.count()
+        nbRow = self.listProperties.count()
         sequence = []
-        if nbFolder > 0:
+        if nbRow > 0:
              i=0
-        while i < nbFolder:
-            #self.editCom.toPlainText()
+        while i < nbRow:
             dirname = self.listProperties.itemWidget(self.listProperties.item(i))            
             sequence.append([int(dirname.stepslabel.toPlainText()),int(dirname.lapsLabel.toPlainText())])
             i=i+1
         print(sequence)    
-        self.manager.addSemGrid('test',sequence,'test desc')
-        self.manager.addSemGrid('test2',sequence,'test desc')
+        self.manager.addSemGrid('Regular Step',sequence,'Regular Step description')
 
 
 
 class MainWidget(QtWidgets.QStackedWidget):
     def __init__(self):
         super(MainWidget,self).__init__()           
-        #self.manager = Manager()
+        self.manager = Manager()
         self.toJson()
         mw=MainWindows(self.manager)
         self.addWidget(mw)
@@ -198,11 +244,6 @@ class MainWidget(QtWidgets.QStackedWidget):
         self.addAction(quit)
 
     def closeEvent(self, event):
-        #print(self.manager)
-        # jsoned=pickle.dumps(self.manager,pickle.HIGHEST_PROTOCOL)
-        # print(jsoned)
-        # dejsoned=pickle.loads(jsoned)
-        # dejsoned.maker.get_portCom()
         with open('bin/data.bin','wb') as fh:
             pickle.dump(self.manager,fh,pickle.HIGHEST_PROTOCOL)
         event.accept()
@@ -212,9 +253,10 @@ class MainWidget(QtWidgets.QStackedWidget):
             data = pickle.load(fh)
         print(data)
         self.manager = data
-        # with open('json/data.json') as fh:
-        #     data = json.load(fh)            
-        # print(data['maker']['mesSemGrids']) 
+        print(self.manager.showSemGrids())
+        # with open('json/data.json') as json_file:
+        #     data = json.load(json_file)
+        # print(data)
         # for grid in data['maker']['mesSemGrids']:
         #     seq = []
         #     print(grid) #une grid
@@ -225,9 +267,9 @@ class MainWidget(QtWidgets.QStackedWidget):
         #     for att in grid['sequence']:
         #         seq.append(att)
         #         print(seq)
-        #     self.manager.addSemGrid(name,seq,desc)
+        # self.manager.addSemGrid(name,seq,desc)
         # print(data['maker']['portCom'])
-        # self.manager.maker.set_portCom(data['maker']['portCom'])        
+        # self.manager.maker.set_portCom(data['maker']['portCom'])
 
 # app = QApplication.instance() 
 # if not app:

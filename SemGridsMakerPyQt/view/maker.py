@@ -8,7 +8,7 @@ Created on Mon Apr 19 09:00:27 2021
 from semGrid import SemGrid
 from json import JSONEncoder
 
-class Maker(JSONEncoder):
+class Maker():
     def __init__(self):
         self.mesSemGrids = []
         self.portCom=None

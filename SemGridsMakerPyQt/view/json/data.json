@@ -2,16 +2,6 @@
     "maker": {
         "mesSemGrids": [
             {
-                "descritpion": "Regular Step description",
-                "name": "Regular Step",
-                "sequence": [
-                    [
-                        1,
-                        50
-                    ]
-                ]
-            },
-            {
                 "descritpion": "Linac3 description",
                 "name": "Linac3",
                 "sequence": [
