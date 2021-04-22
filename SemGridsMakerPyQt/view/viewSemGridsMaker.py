@@ -35,7 +35,8 @@ class MainWindows(QMainWindow):
 
     def customButtonClicked(self):
         if(self.editCom.toPlainText()==""):
-            self.editCom.setPlaceholderText(self.manager.maker.get_portCom())
+             self.labelErrorCom.setText("ENTER A PORT COM")
+             return
         else:
             self.manager.maker.set_portCom(self.editCom.toPlainText())
         custom=CustomDialog(self.manager)
@@ -45,7 +46,8 @@ class MainWindows(QMainWindow):
         
     def progammeSelec(self):
         if(self.editCom.toPlainText()==""):
-            self.editCom.setPlaceholderText(self.manager.maker.get_portCom())
+            self.labelErrorCom.setText("ENTER A PORT COM")
+            return
         else:
             self.manager.maker.set_portCom(self.editCom.toPlainText())
         prgrmName = self.listProgramme.currentItem().text()

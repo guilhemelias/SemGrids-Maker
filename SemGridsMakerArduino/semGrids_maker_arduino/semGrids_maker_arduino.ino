@@ -1,9 +1,9 @@
 ///INCLUDES/////////////////////////////////////////////////////////////////////////////////////
 
-#include <AccelStepper.h>
+//#include <AccelStepper.h>
 //#include "AccelStepper.h"
 //#include <time.h>
-AccelStepper stepper(1,10,8);
+//AccelStepper stepper(1,10,8);
 
 
 
