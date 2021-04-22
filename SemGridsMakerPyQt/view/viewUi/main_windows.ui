@@ -252,6 +252,17 @@
       </item>
       <item>
        <widget class="QPushButton" name="customButton">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Custom Grid</string>
         </property>

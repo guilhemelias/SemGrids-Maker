@@ -7,20 +7,15 @@ Spyder Editor
 import sys
 import serial
 import pickle
-import json
 
 from arduino import Arduino
 from manager import Manager
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
-from semGrid import SemGrid
 
 
 
 from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow, QLabel,QListWidgetItem, QListWidget, QAction
-
-
-
 
 
 
@@ -39,20 +34,7 @@ class MainWindows(QMainWindow):
         for grid in self.manager.maker.mesSemGrids:
             self.listProgramme.addItem(grid.name)
 
-            
-        
-    # def regularStepButtonClicked(self):
-    #     self.manager.maker.set_portCom(self.editCom.toPlainText())
-    #     rsd=RegularStepDialog(self.manager)
-    #     widget.addWidget(rsd)
-    #     widget.setCurrentIndex(widget.currentIndex()+1)
-    
-    # def linac3ButtonClicked(self):
-    #     self.manager.maker.set_portCom(self.editCom.toPlainText())
-    #     linac=Linac3Dialog(self.manager)
-    #     widget.addWidget(linac)
-    #     widget.setCurrentIndex(widget.currentIndex()+1)
-    
+
     def customButtonClicked(self):
         self.manager.maker.set_portCom(self.editCom.toPlainText())
         custom=CustomDialog(self.manager)
@@ -61,22 +43,6 @@ class MainWindows(QMainWindow):
     
         
     def progammeSelec(self):
-        # if(self.listProgramme.currentItem().text()=='Regular Step'):
-        #     self.manager.maker.set_portCom(self.editCom.toPlainText())
-        #     rsd=RegularStepDialog(self.manager)
-        #     widget.addWidget(rsd)
-        #     widget.setCurrentIndex(widget.currentIndex()+1)
-            
-        # elif(self.listProgramme.currentItem().text()=='Linac3'):
-        #     self.manager.maker.set_portCom(self.editCom.toPlainText())
-        #     linac=Linac3Dialog(self.manager)
-        #     widget.addWidget(linac)
-        #     widget.setCurrentIndex(widget.currentIndex()+1)
-        # else:
-        #     self.manager.maker.set_portCom(self.editCom.toPlainText())
-        #     custom=CustomDialog(self.manager)
-        #     widget.addWidget(custom)
-        #     widget.setCurrentIndex(widget.currentIndex()+1)
         self.manager.maker.set_portCom(self.editCom.toPlainText())
         prgrmName = self.listProgramme.currentItem().text()
         # print(prgrmName)
@@ -123,10 +89,10 @@ class CommonProgrammDialog(QDialog):
             myQListWidgetItem.setSizeHint(myItemPropertyDisplayCustom.minimumSizeHint())
             # Add QListWidgetItem into QListWidget
             self.listPropertiesLoaded.setItemWidget(myQListWidgetItem, myItemPropertyDisplayCustom)
-        
-        
-        
+            
+        self.editGap.setPlaceholderText(str(self.manager.maker.get_gap()))
         self.menuButton.clicked.connect(self.menuButtonClicked)
+        self.deleteGridButton.clicked.connect(self.deleteGridButtonClicked)
         self.runCommonButton.clicked.connect(self.runCommonButtonClicked)
     
     def setList(self):
@@ -137,46 +103,51 @@ class CommonProgrammDialog(QDialog):
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
         
+    def deleteGridButtonClicked(self):
+        self.manager.deleteSemGrid(self.manager.getMyCurrentGrid().name)
+        mw=MainWindows(self.manager)
+        widget.addWidget(mw)
+        widget.setCurrentIndex(widget.currentIndex()+1)
+        
     def runCommonButtonClicked(self):
-        pass
-
-
-
-        
-
-class RegularStepDialog(QDialog):
-    def __init__(self,mgr):
-        self.manager=mgr
-        #print(self.manager.maker.get_portCom())
-        super(RegularStepDialog,self).__init__()
-        loadUi("viewUi/regular_step.ui",self)
-       # self.label.setText(self.manager.maker.get_portCom())
-        self.menuButton.clicked.connect(self.menuButtonClicked)
-        self.runRegularStepButton.clicked.connect(self.runRegularStepButtonButtonClicked)
-        
-    def menuButtonClicked(self):
+        self.manager.maker.set_gap(self.editGap.toPlainText())
         mw=MainWindows(self.manager)
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
+
+# class RegularStepDialog(QDialog):
+#     def __init__(self,mgr):
+#         self.manager=mgr
+#         #print(self.manager.maker.get_portCom())
+#         super(RegularStepDialog,self).__init__()
+#         loadUi("viewUi/regular_step.ui",self)
+#        # self.label.setText(self.manager.maker.get_portCom())
+#         self.menuButton.clicked.connect(self.menuButtonClicked)
+#         self.runRegularStepButton.clicked.connect(self.runRegularStepButtonButtonClicked)
         
-    def runRegularStepButtonButtonClicked(self):
-        ar = Arduino()
-        ar.initUART(self.manager.maker.get_portCom())
-
-
-
-
-class Linac3Dialog(QDialog):
-    def __init__(self,mgr):
-        self.manager=mgr
-        super(Linac3Dialog,self).__init__()
-        loadUi("viewUi/linac_3.ui",self)
-        self.menuButton.clicked.connect(self.menuButtonClicked)
+#     def menuButtonClicked(self):
+#         mw=MainWindows(self.manager)
+#         widget.addWidget(mw)
+#         widget.setCurrentIndex(widget.currentIndex()+1)
         
-    def menuButtonClicked(self):
-        mw=MainWindows(self.manager)
-        widget.addWidget(mw)
-        widget.setCurrentIndex(widget.currentIndex()+1)
+#     def runRegularStepButtonButtonClicked(self):
+#         ar = Arduino()
+#         ar.initUART(self.manager.maker.get_portCom())
+
+
+
+
+# class Linac3Dialog(QDialog):
+#     def __init__(self,mgr):
+#         self.manager=mgr
+#         super(Linac3Dialog,self).__init__()
+#         loadUi("viewUi/linac_3.ui",self)
+#         self.menuButton.clicked.connect(self.menuButtonClicked)
+        
+#     def menuButtonClicked(self):
+#         mw=MainWindows(self.manager)
+#         widget.addWidget(mw)
+#         widget.setCurrentIndex(widget.currentIndex()+1)
  
         
 class CustomDialog(QDialog):
@@ -184,17 +155,18 @@ class CustomDialog(QDialog):
         self.manager=mgr
         super(CustomDialog,self).__init__()
         loadUi("viewUi/custom.ui",self)
+        
         myItemPropertyCustom = ItemPropertyCustom()
-        # Create QListWidgetItem
         myQListWidgetItem  = QListWidgetItem(self.listProperties)
-        # Set size hint
         self.listProperties.addItem(myQListWidgetItem)
         myQListWidgetItem.setSizeHint(myItemPropertyCustom.minimumSizeHint())
-        # Add QListWidgetItem into QListWidget
+        
+        self.editGap.setPlaceholderText(self.manager.maker.get_gap())
         
         self.listProperties.setItemWidget(myQListWidgetItem, myItemPropertyCustom)
         self.menuButton.clicked.connect(self.menuButtonClicked)
         self.addButton.clicked.connect(self.addButtonClicked)
+        self.deleteButton.clicked.connect(self.deleteButtonClicked)
         self.runCustomButton.clicked.connect(self.runCustomButtonClicked)
 
         
@@ -205,26 +177,56 @@ class CustomDialog(QDialog):
 
     def addButtonClicked(self):
         myItemPropertyCustom = ItemPropertyCustom()
-        # Create QListWidgetItem
         myQListWidgetItem  = QListWidgetItem(self.listProperties)
-        # Set size hint
         self.listProperties.addItem(myQListWidgetItem)
         myQListWidgetItem.setSizeHint(myItemPropertyCustom.minimumSizeHint())
-        # Add QListWidgetItem into QListWidget      
         self.listProperties.setItemWidget(myQListWidgetItem, myItemPropertyCustom)
-    
+        
+    def deleteButtonClicked(self):
+        items=self.listProperties.selectedItems()
+        for item in items:
+              widget = self.listProperties.itemWidget(item)
+              self.listProperties.removeItemWidget(item)
+              self.listProperties.takeItem(self.listProperties.row(item))
+              widget.deleteLater()     
+
     def runCustomButtonClicked(self):
+        self.manager.maker.set_gap(self.editGap.toPlainText())
         nbRow = self.listProperties.count()
         sequence = []
         if nbRow > 0:
-             i=0
+              i=0
         while i < nbRow:
             dirname = self.listProperties.itemWidget(self.listProperties.item(i))            
-            sequence.append([int(dirname.stepslabel.toPlainText()),int(dirname.lapsLabel.toPlainText())])
+            sequence.append([float(dirname.stepslabel.toPlainText()),int(dirname.lapsLabel.toPlainText())])
             i=i+1
         print(sequence)    
-        self.manager.addSemGrid('Regular Step',sequence,'Regular Step description')
+        # self.manager.addSemGrid('test',sequence,'Regular Step description')
+        custom=GridCreateDialog(self.manager,sequence)
+        custom.exec_()
+        mw=MainWindows(self.manager)
+        widget.addWidget(mw)
+        widget.setCurrentIndex(widget.currentIndex()+1)
 
+
+
+class GridCreateDialog(QDialog):
+    def __init__(self,mgr,sequence):
+        self.manager=mgr
+        super(GridCreateDialog,self).__init__()
+        loadUi("viewUi/grid_create_dialog.ui",self)
+        self.sequence=sequence
+        self.registerAndRunButton.clicked.connect(self.registerAndRunButtonClicked)
+        self.passAndRunButton.clicked.connect(self.passAndRunButtonClicked)
+    
+    def registerAndRunButtonClicked(self):
+        name=self.editName.toPlainText()
+        description=self.editDesc.toPlainText()
+        self.manager.addSemGrid(name,self.sequence,description)
+        self.close()
+        
+    def passAndRunButtonClicked(self):
+        self.close()
 
 
 class MainWidget(QtWidgets.QStackedWidget):
@@ -280,11 +282,5 @@ class MainWidget(QtWidgets.QStackedWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     widget = MainWidget()
-    # mw=MainWindows()
-    # widget=QtWidgets.QStackedWidget()
-    # widget.addWidget(mw)
-    # widget.setFixedHeight(400)
-    # widget.setFixedWidth(800)
-    # widget.setWindowTitle("SEMGrids Maker")
     widget.show()
     sys.exit(app.exec_())

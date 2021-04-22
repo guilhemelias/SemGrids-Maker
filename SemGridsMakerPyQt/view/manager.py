@@ -22,13 +22,12 @@ class Manager():
                 return
         self.maker.addSemGrids(name,seq,desc)
     
-    def deleteSemGrid(self,semGrid):
-        for grid in self.mesSemGrids:
-            if(grid == semGrid):
-                index = self.mesSemGrids.index(grid)
-        if index is None:
-            print('SemGrid non trouve')
-            return
+    def deleteSemGrid(self,name):
+        grid=self.searchSemGrids(name)
+        # if(grid==False):
+        #     print('SemGrid non trouve')
+        #     return
+        index = self.maker.mesSemGrids.index(grid)
         self.maker.deleteSemGrid(index)
         
     def showSemGrids(self):
@@ -44,3 +43,10 @@ class Manager():
         
     def getMyCurrentGrid(self):
         return self.myCurrentGrid
+    
+    
+    
+    
+    
+    
+    
