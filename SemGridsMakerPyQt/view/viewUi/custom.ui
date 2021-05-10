@@ -142,22 +142,6 @@
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_4">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Maximum</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -211,7 +195,7 @@
         <widget class="QLabel" name="labelError">
          <property name="font">
           <font>
-           <pointsize>10</pointsize>
+           <pointsize>8</pointsize>
           </font>
          </property>
          <property name="text">
@@ -278,17 +262,26 @@
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>10</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_8">
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <property name="bottomMargin">
-            <number>20</number>
+            <number>30</number>
            </property>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <property name="topMargin">
-              <number>70</number>
+              <number>30</number>
              </property>
              <item>
               <spacer name="horizontalSpacer_4">
