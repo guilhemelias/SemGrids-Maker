@@ -120,49 +120,79 @@ void loop() {
   delay(5000);
   int nbIndex = 0; 
   int gap = 0; 
-    if(Serial.available()){
+  if(Serial.available()){
       
       
-      String receiveData = Serial.readStringUntil('\r\n');
+    String receiveData = Serial.readStringUntil('\r\n');
       
-      char data[receiveData.length()+1];  
-      char *dataBis[receiveData.length()+1]; 
+    char data[receiveData.length()+1];  
+    char *dataBis[receiveData.length()+1]; 
 
-      receiveData.toCharArray(data,receiveData.length()+1);
+    receiveData.toCharArray(data,receiveData.length()+1);
 
-      Serial.println(receiveData); 
+    Serial.println(receiveData); 
 
-      char *p = data;
-      char *str;
-      int val=0;
+    char *p = data;
+    char *str;
+    int val=0;
 
-       while ((str = strtok_r(p, "/", &p)) != NULL){
-          dataBis[val]=str;         
-          val++;
-       } 
-        
-     
-      nbIndex = atoi(dataBis[0]);
+    while ((str = strtok_r(p, "/", &p)) != NULL){
+      dataBis[val]=str;         
+      val++;
+    } 
+      
+    char * prgm = dataBis[0]; 
+    int resPrgm = strcmp(prgm,"cw");
+
+
+
+    if (resPrgm==0){
+      char * dir = dataBis[1];
+      int nbslide = atoi(dataBis[2]);
+      int resDir = strcmp(dir,"L");
+      if (resDir == 0){
+        int i =0;
+        int gap=nbslide*25;
+        while(i<=gap){
+          GlisCW(5);            
+          i++;
+        }
+      }
+      else{
+        int i =0;
+        int gap=nbslide*25;
+        while(i<=gap){
+          GlisCCW(5);
+          i++;
+        }
+      }
+       
+    }
+    else{
+      nbIndex = atoi(dataBis[1]);
       Serial.println(nbIndex);
 
-      gap = atoi(dataBis[1]);
+      gap = atoi(dataBis[2]);
       Serial.println(gap);
       
                 
       float tabSteps[nbIndex];
       int tabLaps[nbIndex];
       for (int i =0;i<(val-2)/2;i++){         
-        tabSteps[i]=atof(dataBis[i+2]);
+        tabSteps[i]=atof(dataBis[i+3]);
       } 
       for (int i =0;i<(val-2)/2;i++){ 
-        tabLaps[i]=atoi(dataBis[i+2+(val-2)/2]);       
+        tabLaps[i]=atoi(dataBis[i+3+(val-2)/2]);       
       } 
 
       
       movePrgrm(tabSteps,tabLaps,nbIndex,gap);
     }
+     
+      
+  }
        
-      while(-1){}  
+  while(-1){}  
  
   //Arret de la boucle
 

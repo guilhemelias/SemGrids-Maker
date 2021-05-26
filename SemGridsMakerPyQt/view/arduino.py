@@ -10,8 +10,6 @@ import serial
 import time
 
 class Arduino():
-    def __init__(self):
-        pass
     def connect(self,port):
         baudrate = 2000000	
         
@@ -19,9 +17,6 @@ class Arduino():
             self.ser = serial.Serial(
     				port,
     				baudrate
-    				# parity=serial.PARITY_NONE,
-    				# stopbits=serial.STOPBITS_ONE,
-    				# bytesize=serial.EIGHTBITS
     			)
                 
         except serial.SerialException as e:
@@ -30,7 +25,6 @@ class Arduino():
             sys.exit(-1)
                 
     def sendValue(self,val):        
-        print(val)
         print(self.ser.write(val.encode()))
         
         
