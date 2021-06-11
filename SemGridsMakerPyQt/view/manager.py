@@ -44,6 +44,7 @@ class Manager():
         A fonction to search a Grid to the list of saved grid
         """
         for grid in self.maker.mesSemGrids:
+            print(grid.name)
             if (grid.name == name):
                 return grid
         return False

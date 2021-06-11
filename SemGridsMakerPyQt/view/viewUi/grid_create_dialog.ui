@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Register New Pattern</string>
+   <string>Register New Program</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -131,12 +131,12 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>10</height>
+           <height>12</height>
           </size>
          </property>
          <property name="font">
           <font>
-           <pointsize>8</pointsize>
+           <pointsize>7</pointsize>
           </font>
          </property>
          <property name="text">

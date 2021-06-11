@@ -21,7 +21,6 @@ class Maker():
         self.mesSemGrids = []
         self.portCom=None
         self.gap=None
-        self.initialReturn=10
 
 
 
@@ -49,17 +48,7 @@ class Maker():
         """
         self.gap = gap  
         
-    def get_initialReturn(self):
-        """
-        The initialReturn getter
-        """
-        return self.initialReturn
-      
-    def set_initialReturn(self, initialReturn):
-        """
-        The initialReturn setter
-        """
-        self.initialReturn = initialReturn
+    
         
         
         

@@ -9,7 +9,6 @@ import serial
 import pickle
 import re 
 import time
-import json
 
 from arduino import Arduino
 from manager import Manager
@@ -19,12 +18,12 @@ from PyQt5 import QtWidgets
 
 
 
-from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow, QLabel,QListWidgetItem, QListWidget, QAction
+from PyQt5.QtWidgets import QDialog,QStackedWidget, QApplication, QWidget, QMainWindow, QLabel,QListWidgetItem, QListWidget, QAction, QProgressDialog
 
 
 
 
-class MainWidget(QtWidgets.QStackedWidget):
+class MainWidget(QStackedWidget):
     """
      The main widget of the software. It instanciate the model, the mainWindow with different properties and 
      it call the pickleManager to save and load the model
@@ -41,7 +40,7 @@ class MainWidget(QtWidgets.QStackedWidget):
         self.addWidget(mw)
         self.setFixedHeight(400)
         self.setFixedWidth(600)
-        self.setWindowTitle("SEMGrids Maker")
+        self.setWindowTitle("SEMGrids winder programs")
         
         #closing app event to call the model saver.        
         quit = QAction(self)
@@ -61,7 +60,22 @@ class MainWidget(QtWidgets.QStackedWidget):
         load model
 
         """
-        
+        # with open('json/data.json') as json_file:
+        #     data = json.load(json_file)
+        # print(data)
+        # for grid in data['maker']['mesSemGrids']:
+        #     seq = []
+        #     print(grid) #une grid
+        #     desc=grid['descritpion']
+        #     #print(grid['descritpion'])
+        #     name=grid['name']
+        #     #print(grid['name'])
+        #     for att in grid['sequence']:
+        #         seq.append(att)
+        #         print(seq)
+        # self.manager.addSemGrid(name,seq,desc)
+        # print(data['maker']['portCom'])
+        # self.manager.maker.set_portCom(data['maker']['portCom'])
         self.manager = self.pickleManager.loadPickle()
 
         
@@ -81,9 +95,9 @@ class MainWindows(QMainWindow):
         
         self.editCom.setText(self.manager.maker.get_portCom())
         self.customButton.clicked.connect(self.customButtonClicked)
-        self.listProgramme.itemSelectionChanged.connect(self.progammeSelec)
+        self.listProgramme.itemDoubleClicked.connect(self.progammeSelec)
         self.slideButton.clicked.connect(self.slideButtonClicked)
-        
+        self.deleteGridButton.clicked.connect(self.deleteGridButtonClicked)
         #adding semGrids to the listView
         for grid in self.manager.maker.mesSemGrids:
             self.listProgramme.addItem(grid.name)
@@ -128,6 +142,19 @@ class MainWindows(QMainWindow):
         """
         slideDialog=SlideMovementDialog(self.manager)
         slideDialog.exec_()
+        
+    def deleteGridButtonClicked(self):
+        """
+        A fonction to delete the semGrids qnd go back to the menu 
+
+        """
+        prgrmName = self.listProgramme.currentItem().text()
+        test=self.listProgramme.currentRow()
+
+        self.manager.deleteSemGrid(prgrmName)
+        self.listProgramme.takeItem(test)
+
+        
 
 
 
@@ -147,6 +174,7 @@ class CommonProgrammDialog(QDialog):
         super(CommonProgrammDialog,self).__init__()
         loadUi("viewUi/common_programm_dialog.ui",self)
         self.labelDisplayProgrammName.setText(self.manager.getMyCurrentGrid().name)
+        self.SemGridProgressBar.setValue(0)
         
         #properties part loading
         propertyGrid=self.manager.getMyCurrentGrid().sequence
@@ -166,7 +194,6 @@ class CommonProgrammDialog(QDialog):
         
         self.labelDesc.setText(desc)
         self.menuButton.clicked.connect(self.menuButtonClicked)
-        self.deleteGridButton.clicked.connect(self.deleteGridButtonClicked)
         self.runCommonButton.clicked.connect(self.runCommonButtonClicked)
     
 
@@ -208,29 +235,40 @@ class CommonProgrammDialog(QDialog):
         tabSteps = self.manager.getStepFromGrid(self.manager.getMyCurrentGrid())
         tabLaps =self.manager.getLapFromGrid(self.manager.getMyCurrentGrid())
         
-        dist=  self.manager.maker.get_initialReturn() 
-        for step,lap in zip(tabSteps,tabLaps):
-            dist+=step*lap
-        dist+=float(self.manager.maker.get_gap())
-        print(dist)
-        self.manager.maker.set_initialReturn(dist) 
+        
         
         self.manager.connectArduino()
         time.sleep(2)
-        # print(self.manager.arduino.ser.readline().decode('ISO-8859-1'))
-        
-        self.manager.sendDataPatternArduino(self.manager.maker.get_gap(),len(tabSteps),tabSteps,tabLaps)
-        time.sleep(5)
+        totalLaps=0
+        for laps in tabLaps:
+            totalLaps+=laps
 
-        # self.manager.receiveValueArduino()
+        self.manager.sendDataPatternArduino(self.manager.maker.get_gap(),len(tabSteps),tabSteps,tabLaps)
+
+        self.progress(totalLaps)
         
         self.manager.closeArduino()
              
         mw=MainWindows(self.manager)
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
+    
+    def progress(self,totalLaps):
+        advencement=0 
+        coefProgressBar = 100/totalLaps
+        for i in range(totalLaps):
+            ok=self.manager.arduino.ser.readline()  
+            advencement+=coefProgressBar
+            print(advencement)
+            self.SemGridProgressBar.setValue(int(advencement))
 
- 
+        
+
+        
+        
+        
+        
+    
         
 class CustomDialog(QDialog):
     """
@@ -251,7 +289,6 @@ class CustomDialog(QDialog):
         self.listProperties.addItem(myQListWidgetItem)
         myQListWidgetItem.setSizeHint(myItemPropertyCustom.minimumSizeHint())
         
-        self.editGap.setText(self.manager.maker.get_gap())
         
         self.listProperties.setItemWidget(myQListWidgetItem, myItemPropertyCustom)
         self.menuButton.clicked.connect(self.menuButtonClicked)
@@ -299,13 +336,6 @@ class CustomDialog(QDialog):
         to run the wished programm.
 
         """
-        regex = re.search("^[0-9]\d*$", self.editGap.toPlainText())       
-        if (regex):
-          self.manager.maker.set_gap(self.editGap.toPlainText())
-        else:
-            self.editGap.clear()
-            self.LabelErrorGap.setText('YOU MUST ENTER A NUMERIC VALUE')
-            return
         nbRow = self.listProperties.count()
         sequence = []
         if nbRow <= 0:
@@ -314,14 +344,12 @@ class CustomDialog(QDialog):
         
         while i < nbRow:
             dirname = self.listProperties.itemWidget(self.listProperties.item(i))  
-            regexStep = re.search("^[1-9]\d*$", dirname.lapsLabel.toPlainText())
-            regexLabel = re.search("^[0-9]\d*$", dirname.stepslabel.toPlainText())
-            if( not regexStep or  not regexLabel):
+            regexLaps = re.search("^[0-9]\d*$", dirname.lapsLabel.toPlainText())
+            regexStep = re.search("[+-]?([0-9]*[.])?[0-9]+", dirname.stepslabel.toPlainText())
+            if( not regexStep or  not regexLaps):
                 self.labelError.setText('YOU MUST ENTER FLOAT STEPS AND NUMERIC LAPS')
                 return
             self.labelError.clear()
-            # tabSteps=float(dirname.stepslabel.toPlainText())
-            # tabLaps=int(dirname.lapsLabel.toPlainText())
             sequence.append([float(dirname.stepslabel.toPlainText()),int(dirname.lapsLabel.toPlainText())])
             i=i+1
         
@@ -330,8 +358,6 @@ class CustomDialog(QDialog):
         mw=MainWindows(self.manager)
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
-
-
 
 
 
@@ -353,15 +379,23 @@ class GridCreateDialog(QDialog):
         User decide to save it
 
         """
-        name=self.editName.toPlainText()
-        description=self.editDesc.toPlainText()
-        res = self.manager.addSemGrid(name,self.sequence,description)
-        if(res==False):
-            self.labelError.setText('SEMGRID DEJA EXISTANTE')
+        regex = re.search("^[a-zA-Z0-9]+$", self.editName.toPlainText())       
+        if (regex):
+           name=self.editName.toPlainText()
+           description=self.editDesc.toPlainText()
+           res = self.manager.addSemGrid(name,self.sequence,description)
+           if(res==False):
+               self.labelError.setText('SEMGRID DEJA EXISTANTE')
+               return
+           self.close()
+        else:
+            self.editName.clear()
+            self.labelError.setText('YOU MUST ENTER A NAME')
             return
-        self.close()
+       
         
     
+
         
 
 class SlideMovementDialog(QDialog):
@@ -384,7 +418,7 @@ class SlideMovementDialog(QDialog):
         self.close()
         
     def slideRightButtonClicked(self):
-        regex = re.search("^[1-9]\d*$", self.editSlideMovement.toPlainText())       
+        regex = re.search("[+-]?([0-9]*[.])?[0-9]+", self.editSlideMovement.toPlainText())       
         if (regex):
           self.manager.connectArduino()
           time.sleep(2)
@@ -397,13 +431,9 @@ class SlideMovementDialog(QDialog):
             self.editSlideMovement.clear()
             self.LabelErrorSlideMovement.setText('YOU MUST ENTER A POSITIVE NUMERIC VALUE')
         
-        
-        
-        
-        
     
     def slideLeftButtonClicked(self):
-        regex = re.search("^[1-9]\d*$", self.editSlideMovement.toPlainText())       
+        regex = re.search("[+-]?([0-9]*[.])?[0-9]+", self.editSlideMovement.toPlainText())       
         if (regex):
           self.manager.connectArduino()
           time.sleep(2)
@@ -416,6 +446,7 @@ class SlideMovementDialog(QDialog):
             self.LabelErrorSlideMovement.setText('YOU MUST ENTER A POSITIVE NUMERIC VALUE')
 
 
+       
 
 
 

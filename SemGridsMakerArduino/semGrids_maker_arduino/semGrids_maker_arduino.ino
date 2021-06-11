@@ -120,6 +120,7 @@ void loop() {
   delay(5000);
   int nbIndex = 0; 
   int gap = 0; 
+  
   if(Serial.available()){
       
       
@@ -130,7 +131,7 @@ void loop() {
 
     receiveData.toCharArray(data,receiveData.length()+1);
 
-    Serial.println(receiveData); 
+    
 
     char *p = data;
     char *str;
@@ -170,22 +171,19 @@ void loop() {
     }
     else{
       nbIndex = atoi(dataBis[1]);
-      Serial.println(nbIndex);
 
       gap = atoi(dataBis[2]);
-      Serial.println(gap);
-      
-                
+          
       float tabSteps[nbIndex];
       int tabLaps[nbIndex];
       for (int i =0;i<(val-2)/2;i++){         
         tabSteps[i]=atof(dataBis[i+3]);
       } 
       for (int i =0;i<(val-2)/2;i++){ 
-        tabLaps[i]=atoi(dataBis[i+3+(val-2)/2]);       
+        tabLaps[i]=atoi(dataBis[i+3+(val-2)/2]);    
+        
       } 
 
-      
       movePrgrm(tabSteps,tabLaps,nbIndex,gap);
     }
      
@@ -208,10 +206,7 @@ void loop() {
 
 void movePrgrm(float *tabSteps, int *tabLaps, int nbIndex, int gap){
   
-  for (int i =0;i<nbIndex;i++){                 
-        Serial.println(tabSteps[i]);
-        Serial.println(tabLaps[i]);
-      } 
+  
   float pasGap = gap*25;
   reposition(pasGap);
   move(3200, 1, 1, -1, 1 * dir);
@@ -220,6 +215,7 @@ void movePrgrm(float *tabSteps, int *tabLaps, int nbIndex, int gap){
     int pas = tabSteps[i]*25;   
     while(tour<tabLaps[i]){    
       move(3200, pas, 1, -1, 1 * dir);
+      Serial.println("ok");
       tour++;     
     }
   } 
@@ -288,7 +284,7 @@ long int delaytime(int maxvel, int min_value, int currentStep) {
        //Serial.print("=");
        //Serial.println(currentStep%M1_stepsPer_Rot);
  
-       Serial.println(val);
+      // Serial.println(val);
        //Serial.println(1e6 / val);
        ////return 10000;
        return (int)(1e6*(1.0/val));

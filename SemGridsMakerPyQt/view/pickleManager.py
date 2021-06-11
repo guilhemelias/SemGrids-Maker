@@ -13,11 +13,12 @@ class PickleManager():
     def savePickle(self,manager):
         with open('bin/data.bin','wb') as fh:
             pickle.dump(manager,fh,pickle.HIGHEST_PROTOCOL)
-    
+        pass
     def loadPickle(self):
         with open('bin/data.bin', 'rb') as fh:
-            data = pickle.load(fh)
+             data = pickle.load(fh)
         return data
+        
     
     
     
