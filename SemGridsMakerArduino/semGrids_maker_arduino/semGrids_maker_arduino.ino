@@ -5,7 +5,7 @@
 //#include <time.h>
 //AccelStepper stepper(1,10,8);
 
-
+#include <Arduino.h>
 
 
 
@@ -25,9 +25,9 @@ int M2_dir = 8;
  
 
 //motor 1 parameters
-int M1_max_speed = 1400;               // steps per second                                 
+int M1_max_speed = 14000;               // steps per second                                 
 int M1_max_acc = 200; 
-int M1_min_speed = 400;                // steps per second second
+int M1_min_speed = 4000;                // steps per second second
 //motor 2 paramiters
 
 int M2_max_speed = 4000;               // steps per second
@@ -52,7 +52,7 @@ int dir = 1;
 
 
 //Reposition Glissiere
-float mm_deplacee=10;
+float mm_deplacee=50;
 int pas4=mm_deplacee*25;
 
 
@@ -76,7 +76,8 @@ float distGlissiere = regularStep*25;
 
 
 
-
+volatile String buffer;
+volatile bool inputComplete = false;
 
 
 
@@ -107,17 +108,65 @@ void setup() {
    //establish motor brake pins
    pinMode(9, OUTPUT); //brake (disable) CH A
    pinMode(8, OUTPUT); //brake (disable) CH B
+
+  Serial.begin(2000000);
+  Serial.flush();
 }
+
+
+
 
 void loop() {
-  delay(4000);  //pause de 4s  
-  //reposition();
-  moveRegularStep();
-  while(-1){} //Arret de la boucle
+  delay(5000);
+  int nbIndex = 0; 
+  int gap = 0; 
+    if(Serial.available()){
+      
+      
+      String receiveData = Serial.readStringUntil('\r\n');
+      
+      char data[receiveData.length()+1];  
+      char *dataBis[receiveData.length()+1]; 
+
+      receiveData.toCharArray(data,receiveData.length()+1);
+
+      Serial.println(receiveData); 
+
+      char *p = data;
+      char *str;
+      int val=0;
+
+       while ((str = strtok_r(p, "/", &p)) != NULL){
+          dataBis[val]=str;         
+          val++;
+       } 
+        
+     
+      nbIndex = atoi(dataBis[0]);
+      Serial.println(nbIndex);
+
+      gap = atoi(dataBis[1]);
+      Serial.println(gap);
+      
+                
+      float tabSteps[nbIndex];
+      int tabLaps[nbIndex];
+      for (int i =0;i<(val-2)/2;i++){         
+        tabSteps[i]=atof(dataBis[i+2]);
+      } 
+      for (int i =0;i<(val-2)/2;i++){ 
+        tabLaps[i]=atoi(dataBis[i+2+(val-2)/2]);       
+      } 
+
+      
+      movePrgrm(tabSteps,tabLaps,nbIndex,gap);
+    }
+       
+      while(-1){}  
+ 
+  //Arret de la boucle
 
 }
-
-
 
 
 
@@ -126,62 +175,35 @@ void loop() {
 
 ///PROGRAMMES/////////////////////////////////////////////////////////////////////////////////////
 
-void reposition(){
-  int i =0;
-  while(i<=pas4){
-  GlisCCW(5);
-  //GlisCW(5);
-  i++;
-  }
+
+void movePrgrm(float *tabSteps, int *tabLaps, int nbIndex, int gap){
+  
+  for (int i =0;i<nbIndex;i++){                 
+        Serial.println(tabSteps[i]);
+        Serial.println(tabLaps[i]);
+      } 
+  float pasGap = gap*25;
+  reposition(pasGap);
+  move(3200, 1, 1, -1, 1 * dir);
+  for (int i = 0 ; i < nbIndex ; i++){
+    int tour =0;    
+    int pas = tabSteps[i]*25;   
+    while(tour<tabLaps[i]){    
+      move(3200, pas, 1, -1, 1 * dir);
+      tour++;     
+    }
+  } 
 }
-
-void moveRegularStep(){
-  int dir = 1;
-       int i=0;
-       while(i<nombre_de_tour)
-       {
-       move(3200, distGlissiere, 1, -1, 1 * dir);
-      i++; 
-       }
+ 
+  
+  void reposition(int gap){
+    int i =0;
+    while(i<=gap){
+    //GlisCCW(5);
+    GlisCW(5);
+    i++;
+    }
 }
-
- void moveLinac3(){
-       move(3200, 25, 1, -1, 1 * dir);       
-       int a=0;
-       while (a<a_tour) {
-         float pas=a_pas*25;
-         move(3200, pas, 1, -1, 1 * dir);
-         a++;       
-       }
-       int b=0;
-       while (b<b_tour) {
-         float pas=b_pas*25;
-         move(3200, pas, 1, -1, 1 * dir);
-         b++;       
-       }
-       int c = 0;
-       while (c<c_tour) {
-         float pas=c_pas*25;
-         move(3200, pas, 1, -1, 1 * dir);
-         c++;        
-       }
-       int d=0;
-       while (d<d_tour) {
-         float pas=d_pas*25;
-         move(3200, pas, 1, -1, 1 * dir);
-         d++;       
-       }
-       int e=0;
-       while (e<e_tour) {
-         float pas=e_pas*25;
-         move(3200, pas, 1, -1, 1 * dir);
-         e++;       
-       }      
-       move(3200, 25, 1, -1, -1 * dir); 
-}
-
-
-
 
 
 
@@ -248,11 +270,13 @@ void takeStep(int pwm1, long int dely, int dirpin, int dir) {
        if (dir >= 1) 
        digitalWrite(dirpin, HIGH);
        else digitalWrite(dirpin, LOW);
- 
-       digitalWrite(pwm1, HIGH);
-       delayMicroseconds(dely);
-       digitalWrite(pwm1, LOW);
-       delayMicroseconds(dely);
+      for( int i = 1; i < 11; i++ ){
+        digitalWrite(pwm1, HIGH);
+        delayMicroseconds(dely);
+        digitalWrite(pwm1, LOW);
+        delayMicroseconds(dely);
+      }
+       
  
 }
 
@@ -336,5 +360,3 @@ void GlisCW(int delaylegnth){
     delay(delaylegnth);
 
 }
-
-

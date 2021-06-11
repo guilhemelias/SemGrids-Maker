@@ -8,6 +8,8 @@ import sys
 import serial
 import pickle
 import re 
+import time
+import json
 
 from arduino import Arduino
 from manager import Manager
@@ -26,6 +28,7 @@ class MainWindows(QMainWindow):
         loadUi("viewUi/main_windows.ui",self)      
         self.setWindowTitle("Ma fenetre")
         self.manager = mgr
+        
         self.editCom.setText(self.manager.maker.get_portCom())
         self.customButton.clicked.connect(self.customButtonClicked)
         self.listProgramme.itemSelectionChanged.connect(self.progammeSelec)
@@ -52,6 +55,7 @@ class MainWindows(QMainWindow):
             self.manager.maker.set_portCom(self.editCom.toPlainText())
         prgrmName = self.listProgramme.currentItem().text()
         grid=self.manager.searchSemGrids(prgrmName)
+        self.manager.setCurrentGrid(grid)
         custom=CommonProgrammDialog(self.manager,grid)
         widget.addWidget(custom)
         widget.setCurrentIndex(widget.currentIndex()+1)
@@ -81,14 +85,16 @@ class ItemPropertyDisplayCustom(QWidget):
 
 
 class CommonProgrammDialog(QDialog):
+    
     def __init__(self,mgr,grid):
         self.manager=mgr
-        self.manager.setCurrentGrid(grid)
+        #self.manager.setCurrentGrid(grid)
         super(CommonProgrammDialog,self).__init__()
         loadUi("viewUi/common_programm_dialog.ui",self)
         self.labelDisplayProgrammName.setText(self.manager.getMyCurrentGrid().name)
         propertyGrid=self.manager.getMyCurrentGrid().sequence
-        
+        # self.manager.getStepFromGrid(self.manager.getMyCurrentGrid())
+        # self.manager.getLapFromGrid(self.manager.getMyCurrentGrid())
         for seq in propertyGrid:
             myQListWidgetItem  = QListWidgetItem(self.listPropertiesLoaded)
             self.listPropertiesLoaded.addItem(myQListWidgetItem)
@@ -123,7 +129,20 @@ class CommonProgrammDialog(QDialog):
             self.editGap.clear()
             self.LabelErrorGap.setText('YOU MUST ENTER A NUMERIC VALUE')
             return
+        tabSteps = self.manager.getStepFromGrid(self.manager.getMyCurrentGrid())
+        tabLaps =self.manager.getLapFromGrid(self.manager.getMyCurrentGrid())
+        
+        self.manager.connectArduino()
+        time.sleep(2)
 
+        self.manager.sendDataArduino(self.manager.maker.get_gap(),len(tabSteps),tabSteps,tabLaps)
+        time.sleep(5)
+
+        # print(self.manager.arduino.ser.readline().decode('ISO-8859-1'))
+
+        self.manager.closeArduino()
+        
+       
         mw=MainWindows(self.manager)
         widget.addWidget(mw)
         widget.setCurrentIndex(widget.currentIndex()+1)
@@ -182,7 +201,6 @@ class CustomDialog(QDialog):
         if nbRow <= 0:
             print('REMPLIR CASES')
         i=0
-        bool=True
         while i < nbRow:
             dirname = self.listProperties.itemWidget(self.listProperties.item(i))  
             regexStep = re.search("^[1-9]\d*$", dirname.lapsLabel.toPlainText())
@@ -263,9 +281,6 @@ class MainWidget(QtWidgets.QStackedWidget):
         # print(data['maker']['portCom'])
         # self.manager.maker.set_portCom(data['maker']['portCom'])
 
-# app = QApplication.instance() 
-# if not app:
-#     app = QApplication(sys.argv)
 
 
 
