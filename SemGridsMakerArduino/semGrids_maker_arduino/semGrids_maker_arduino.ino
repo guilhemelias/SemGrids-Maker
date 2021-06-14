@@ -120,49 +120,73 @@ void loop() {
   delay(5000);
   int nbIndex = 0; 
   int gap = 0; 
-    if(Serial.available()){
-      
-      
-      String receiveData = Serial.readStringUntil('\r\n');
-      
-      char data[receiveData.length()+1];  
-      char *dataBis[receiveData.length()+1]; 
+  //When detect data
+  if(Serial.available()){
+     //receive the chain until his end
+    String receiveData = Serial.readStringUntil('\r\n');
+    //Creation of char var to recives these data
+    char data[receiveData.length()+1];  
+    char *dataBis[receiveData.length()+1]; 
 
-      receiveData.toCharArray(data,receiveData.length()+1);
-
-      Serial.println(receiveData); 
-
-      char *p = data;
-      char *str;
-      int val=0;
-
-       while ((str = strtok_r(p, "/", &p)) != NULL){
-          dataBis[val]=str;         
-          val++;
-       } 
-        
-     
-      nbIndex = atoi(dataBis[0]);
-      Serial.println(nbIndex);
-
-      gap = atoi(dataBis[1]);
-      Serial.println(gap);
-      
-                
+    receiveData.toCharArray(data,receiveData.length()+1);
+    char *p = data;
+    char *str;
+    int val=0;
+  //split the data in a tab with the separator "/"
+    while ((str = strtok_r(p, "/", &p)) != NULL){
+      dataBis[val]=str;         
+      val++;
+    } 
+    //Fisrt Data : if this is a slide or windr program
+    char * prgm = dataBis[0]; 
+    int resPrgm = strcmp(prgm,"cw");
+    // If this is a slide program
+    if (resPrgm==0){
+      //2nd Data  : direction
+      char * dir = dataBis[1];
+      // 3rd data : number of mm of movement
+      int nbslide = atoi(dataBis[2]);
+      int resDir = strcmp(dir,"L");
+      if (resDir == 0){
+        int i =0;
+        int gap=nbslide*25;
+        while(i<=gap){
+          GlisCW(5);            
+          i++;
+        }
+      }
+      else{
+        int i =0;
+        int gap=nbslide*25;
+        while(i<=gap){
+          GlisCCW(5);
+          i++;
+        }
+      }     
+    }
+    //If this is a winder program
+    else{
+      //2nd Data : number of sequence
+      nbIndex = atoi(dataBis[1]);
+      //3rd data : gap
+      gap = atoi(dataBis[2]);
+     //creation of two tabs : one for the steps, the other for the laps     
       float tabSteps[nbIndex];
       int tabLaps[nbIndex];
       for (int i =0;i<(val-2)/2;i++){         
-        tabSteps[i]=atof(dataBis[i+2]);
+        tabSteps[i]=atof(dataBis[i+3]);
       } 
       for (int i =0;i<(val-2)/2;i++){ 
-        tabLaps[i]=atoi(dataBis[i+2+(val-2)/2]);       
+        tabLaps[i]=atoi(dataBis[i+3+(val-2)/2]);    
+        
       } 
-
-      
       movePrgrm(tabSteps,tabLaps,nbIndex,gap);
     }
+     
+      
+  }
        
-      while(-1){}  
+  while(-1){}  
  
   //Arret de la boucle
 
@@ -178,10 +202,7 @@ void loop() {
 
 void movePrgrm(float *tabSteps, int *tabLaps, int nbIndex, int gap){
   
-  for (int i =0;i<nbIndex;i++){                 
-        Serial.println(tabSteps[i]);
-        Serial.println(tabLaps[i]);
-      } 
+  
   float pasGap = gap*25;
   reposition(pasGap);
   move(3200, 1, 1, -1, 1 * dir);
@@ -190,6 +211,7 @@ void movePrgrm(float *tabSteps, int *tabLaps, int nbIndex, int gap){
     int pas = tabSteps[i]*25;   
     while(tour<tabLaps[i]){    
       move(3200, pas, 1, -1, 1 * dir);
+      Serial.println("ok");
       tour++;     
     }
   } 
@@ -258,7 +280,7 @@ long int delaytime(int maxvel, int min_value, int currentStep) {
        //Serial.print("=");
        //Serial.println(currentStep%M1_stepsPer_Rot);
  
-       Serial.println(val);
+      // Serial.println(val);
        //Serial.println(1e6 / val);
        ////return 10000;
        return (int)(1e6*(1.0/val));

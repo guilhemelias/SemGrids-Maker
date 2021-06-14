@@ -16,7 +16,7 @@ void setup() {
   
   
 }
-float mm_deplacee=20;
+float mm_deplacee=40;
 
 int pas4=mm_deplacee*25;
 
